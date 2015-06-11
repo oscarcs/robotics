@@ -90,6 +90,9 @@ task main()
 	bFloatDuringInactiveMotorPWM = true;
 	kickoff();
 
+	motor[motorA] = 0;
+	motor[motorC] = 0;
+
 	//set up sensor variables
 	int _dirDC = 0;
   int _dirAC = 0;
@@ -115,27 +118,34 @@ task main()
 	while (true)
 	{
 		//int ir = SensorValue[S1];
-		//int comp = SensorValue[S2];
 
-		// Read the Enhanced direction and strength
+		// Read the 'enhanced' direction and strength
 		if (!HTIRS2readEnhanced(HTIRS2, _dirEnh, _strEnh))
+		{
+    	nxtDisplayCenteredTextLine(5, "I2C READ ERROR");
+			wait1Msec(2500);
     	break; // I2C read error occurred
+  	}
 
-    char str_dirEnh[15] = (char) _dirEnh;
-    char str_strEnh[15] = (char) _strEnh;
+  	int comp = SensorValue[S2];
+
+    char str_dirEnh[15], str_strEnh[15];
+   	//snprintf(str_dirEnh, sizeof(str_dirEnh), "%d%d", "d ", _dirEnh);
+		//snprintf(str_strEnh, sizeof(str_strEnh), "%d%d", "s ", _strEnh);
+
+    sprintf(str_dirEnh, "%d", _dirEnh);
+		sprintf(str_strEnh, "%d", _strEnh);
 
     nxtDisplayCenteredTextLine(5, str_dirEnh);
     nxtDisplayCenteredTextLine(6, str_strEnh);
 
     //char str_ir[15];
-		//char str_comp[15];
-
+		char str_comp[15];
 		//'print' the 'val' variable to the string (%d) 'str'.
 		//sprintf(str_ir, "%d", ir);
-		//sprintf(str_comp, "%d", comp);
-
+		sprintf(str_comp, "%d", comp);
 		//nxtDisplayCenteredTextLine(5, str_ir);
-		//nxtDisplayCenteredTextLine(6, str_comp);
+		nxtDisplayCenteredTextLine(7, str_comp);
 
 		//turnToDirection(comp, 0);
 
