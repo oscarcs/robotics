@@ -28,16 +28,17 @@ int min(int x, int y)
 	else { return y; }
 }
 
-void turnLeft()
+
+void turnLeft(int num_dist)
 {
 	motor[motorA] = fast;
-	motor[motorC] = -slow;
+	motor[motorC] =-slow;
 	lastdirection = 1;
 }
 
-void turnRight()
+void turnRight(int num_dist)
 {
-	motor[motorA] = -slow;
+	motor[motorA] =-slow;
 	motor[motorC] = fast;
 	lastdirection = 9;
 }
@@ -54,10 +55,10 @@ void swivelRight(int pwr)
 	motor[motorC] = pwr;
 }
 
-void forward()
+void forward(int pwr)
 {
-	motor[motorA] = fast;
-	motor[motorC] = fast;
+	motor[motorA] = pwr;
+	motor[motorC] = pwr;
 }
 
 void kickoff()
@@ -73,7 +74,7 @@ void kickoff()
 void turnToDirection(int current, int target)
 {
 	int cur = (current - target) % 360;
-	if(cur > 180)
+	if(cur > 185)
 	{
 		cur = 360-cur;
 		swivelRight(cur);
@@ -81,6 +82,10 @@ void turnToDirection(int current, int target)
 	else if (cur > 5)
 	{
 		swivelLeft(cur);
+	}
+	else
+	{
+		forward(fast);
 	}
 }
 
@@ -94,8 +99,6 @@ task main()
 	motor[motorC] = 0;
 
 	//set up sensor variables
-	int _dirDC = 0;
-  int _dirAC = 0;
 	int _dirEnh, _strEnh;
 
 	//we need our AC sensing to be at 1200Hz
@@ -108,8 +111,7 @@ task main()
 		if (HTIRS2setDSPMode(HTIRS2, _mode))
 		{
 			break; // Sensor initialized
-		}
-
+	}
 		nxtDisplayCenteredTextLine(6, "Connect Sensor");
     nxtDisplayCenteredTextLine(7, "to Port S1!");
 	} //setup
@@ -128,26 +130,43 @@ task main()
   	}
 
   	int comp = SensorValue[S2];
+  	int dist = 310 - _strEnh;
 
-    char str_dirEnh[15], str_strEnh[15];
-   	//snprintf(str_dirEnh, sizeof(str_dirEnh), "%d%d", "d ", _dirEnh);
-		//snprintf(str_strEnh, sizeof(str_strEnh), "%d%d", "s ", _strEnh);
+    //print values to screen.
+  	char str_dirEnh[15], str_strEnh[15], str_comp[15], str_dist[15];
 
     sprintf(str_dirEnh, "%d", _dirEnh);
 		sprintf(str_strEnh, "%d", _strEnh);
-
-    nxtDisplayCenteredTextLine(5, str_dirEnh);
-    nxtDisplayCenteredTextLine(6, str_strEnh);
-
-    //char str_ir[15];
-		char str_comp[15];
-		//'print' the 'val' variable to the string (%d) 'str'.
-		//sprintf(str_ir, "%d", ir);
 		sprintf(str_comp, "%d", comp);
-		//nxtDisplayCenteredTextLine(5, str_ir);
-		nxtDisplayCenteredTextLine(7, str_comp);
+		sprintf(str_dist, "%d", dist);
 
-		//turnToDirection(comp, 0);
+    nxtDisplayCenteredTextLine(3, str_dirEnh);
+    nxtDisplayCenteredTextLine(4, str_strEnh);
+    nxtDisplayCenteredTextLine(5, str_comp);
+    nxtDisplayCenteredTextLine(6, str_dist);
+
+    int num_dist = abs(5 - _dirEnh);
+    num_dist = (4 - num_dist) * 10;
+
+		if(dist > 10)
+			//right
+			{
+			if (_dirEnh > 5) {
+				turnRight(num_dist);
+			}
+			//straight
+			else if (_dirEnh == 5) {
+				forward(fast);
+			}
+			//left
+			else if (_dirEnh < 5) {
+				turnLeft(num_dist);
+			}
+		}
+		else
+		{
+    	turnToDirection(comp, 0);
+  	}
 
 		/*
 		//when the sensor is confused
@@ -178,5 +197,5 @@ task main()
 			turnLeft();
 		}
 		*/
-	} //main loop
+	} //main while loop
 }
