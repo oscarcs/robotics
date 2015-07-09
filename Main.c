@@ -74,12 +74,12 @@ void kickoff()
 void turnToDirection(int current, int target)
 {
 	int cur = (current - target) % 360;
-	if(cur > 185)
+	if(cur > 187)
 	{
 		cur = 360-cur;
 		swivelRight(cur);
 	}
-	else if (cur > 5)
+	else if (cur > 3)
 	{
 		swivelLeft(cur);
 	}
@@ -111,7 +111,7 @@ task main()
 		if (HTIRS2setDSPMode(HTIRS2, _mode))
 		{
 			break; // Sensor initialized
-	}
+		}
 		nxtDisplayCenteredTextLine(6, "Connect Sensor");
     nxtDisplayCenteredTextLine(7, "to Port S1!");
 	} //setup
@@ -121,7 +121,7 @@ task main()
 	{
 		//int ir = SensorValue[S1];
 
-		// Read the 'enhanced' direction and strength
+		// Read the 'enhanced' direction and strength, which combines AC and DC readings for accuracy
 		if (!HTIRS2readEnhanced(HTIRS2, _dirEnh, _strEnh))
 		{
     	nxtDisplayCenteredTextLine(5, "I2C READ ERROR");
@@ -135,11 +135,12 @@ task main()
     //print values to screen.
   	char str_dirEnh[15], str_strEnh[15], str_comp[15], str_dist[15];
 
+  	//setup variables so we can show them on the screen
     sprintf(str_dirEnh, "%d", _dirEnh);
 		sprintf(str_strEnh, "%d", _strEnh);
 		sprintf(str_comp, "%d", comp);
 		sprintf(str_dist, "%d", dist);
-
+		//show the variables
     nxtDisplayCenteredTextLine(3, str_dirEnh);
     nxtDisplayCenteredTextLine(4, str_strEnh);
     nxtDisplayCenteredTextLine(5, str_comp);
