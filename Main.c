@@ -7,6 +7,12 @@
  * Robotics Team 2015
  */
 
+ //SENSOR SETUP NOTES
+ //1 is IR sensor
+ //2 is compass sensor
+ //A is right
+ //C is left
+
 #include "drivers/hitechnic-irseeker-v2.h"
 
 //global variables
