@@ -68,10 +68,29 @@ void forward(int pwr)
 	motor[motorC] = pwr;
 }
 
-void flick(int pwr)
+void flick(bool left, bool right)
 {
-	motor[motorA] = (-pwr / abs(pwr)) * fast; //right
-	motor[motorC] = (pwr / abs(pwr)) * fast; //left
+	int leftPwr = fast;
+	int rightPwr = fast;
+
+	if (left)
+	{
+		leftPwr = slow;
+	}
+
+	if (right)
+	{
+		rightPwr = slow;
+	}
+
+	if(left && right)
+	{
+		leftPwr = fast;
+		rightPwr = fast;
+	}
+
+	motor[motorA] = leftPwr;
+	motor[motorC] = rightPwr;
 }
 
 void kickoff()
@@ -87,29 +106,30 @@ void kickoff()
 void turnToDirection(int current, int target)
 {
 	int cur = dirDifference(current, target);
-	if(abs(cur) > 2)
+	if(cur > 0)
 	{
-		flick(cur + 10);
+		flick(false, true);
 	}
-	else
+	else if (cur == 0)
 	{
-		forward(fast);
+		flick(true, true);
+	}
+	else if (cur < 0)
+	{
+		flick(true, false);
 	}
 }
 
 //always put this task last
 task main()
 {
-	bFloatDuringInactiveMotorPWM = true;
-	kickoff();
-
 	motor[motorA] = 0;
 	motor[motorC] = 0;
 
 	//set up sensor variables
 	int _dirEnh, _strEnh;
 
-	//we need our AC sensing to be at 1200Hz
+	//we need our AC sensing to be at 1200Hz for w/e reason
   tHTIRS2DSPMode _mode = DSP_1200;
 
   //setup loop
@@ -131,11 +151,12 @@ task main()
 	sprintf(str_targetDirection, "%d", targetDirection);
 	nxtDisplayCenteredTextLine(0, str_targetDirection);
 
+	bFloatDuringInactiveMotorPWM = true;
+	kickoff();
+
 	//main loop
 	while (true)
 	{
-		//int ir = SensorValue[S1];
-
 		// Read the 'enhanced' direction and strength, which combines AC and DC readings for accuracy
 		if (!HTIRS2readEnhanced(HTIRS2, _dirEnh, _strEnh))
 		{
@@ -164,7 +185,7 @@ task main()
     int num_dist = abs(5 - _dirEnh);
     num_dist = (4 - num_dist) * 10;
 
-		if(dist > 10)
+		if(dist > 15)
 		{
 			//right
 			if (_dirEnh > 5)
@@ -182,39 +203,32 @@ task main()
 				turnLeft(num_dist);
 			}
 		}
-		else if (abs(dirDifference(comp, targetDirection)) > 8)
+		/*
+		else if (abs(dirDifference(comp, targetDirection)) > 10)
 		{
     	turnToDirection(comp, targetDirection);
   	}
+  	*/
 
-		/*
-		//when the sensor is confused
-		if(ir == 0) {
-			if (lastdirection == 9)
+  	//if the ball is close and we are heading towards the goal
+  	else if(abs(dirDifference(comp, targetDirection)) < 90) //invert
+  	{
+  		//right
+			if (_dirEnh > 6)
 			{
-				turnRight();
+				turnLeft(num_dist);
 			}
-			else if (lastdirection == 1)
+			//left
+			else if (_dirEnh < 4)
 			{
-				turnLeft();
+				turnRight(num_dist);
 			}
+			//straight
 			else
 			{
-				turnRight();
+				forward(fast);
 			}
 		}
-		//right
-		else if (ir > 5) {
-			turnRight();
-		}
-		//straight
-		else if (ir == 5) {
-			forward();
-		}
-		//left
-		else if (ir < 5) {
-			turnLeft();
-		}
-		*/
+
 	} //main while loop
 }
